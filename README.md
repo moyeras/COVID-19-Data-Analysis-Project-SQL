@@ -200,7 +200,9 @@ Please note that the dataset may have been updated over time, so ensure you are 
         1, 2;
         ```
     
-12. Retrieve total death counts for countries not associated with any continent:
+    ### Tableau Preparation Queries
+    
+13. Retrieve total death counts for countries not associated with any continent:
         ```sql
         SELECT 
         location, 
@@ -216,7 +218,10 @@ Please note that the dataset may have been updated over time, so ensure you are 
     ORDER BY 
         TotalDeathCount DESC;
         ```
-13. Get the highest infection count and infection percentage for each location:
+    
+    ### Tableau Preparation Queries
+    
+15. Get the highest infection count and infection percentage for each location:
         ```sql
         SELECT 
         Location, 
@@ -230,9 +235,10 @@ Please note that the dataset may have been updated over time, so ensure you are 
     ORDER BY 
         PercentPopulationInfected DESC;
         ```
-
-14. Get the highest infection count and infection percentage with a date filter:
-    ### abc
+    
+    ### Tableau Preparation Queries
+    
+17. Get the highest infection count and infection percentage with a date filter:    
         ```sql
         SELECT 
         Location, 
