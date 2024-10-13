@@ -9,6 +9,15 @@ This project involves analyzing COVID-19 data, focusing on deaths and vaccinatio
 - `PortfolioProject..Covid_Deaths`: Contains data on COVID-19 deaths, including location, date, total cases, and population.
 - `PortfolioProject..Covid_Vaccinated`: Contains data on COVID-19 vaccinations, including the number of people fully vaccinated and new vaccinations.
 
+## Dataset
+
+The analysis is based on the COVID-19 dataset, which includes data on deaths and vaccinations. The dataset can be accessed at the following link:
+
+[COVID-19 Dataset] (https://ourworldindata.org/covid-deaths)
+
+Please note that the dataset may have been updated over time, so ensure you are using the correct version for consistency in analysis.
+
+
 ## SQL Queries
 
 ### Data Retrieval and Cleaning
