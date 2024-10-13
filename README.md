@@ -1,121 +1,154 @@
-COVID-19 Data Analysis Portfolio
-This project involves performing SQL queries on two datasets: Covid_Deaths and Covid_Vaccinations. The goal is to analyze the impact of the pandemic across various locations, track vaccination efforts, and derive meaningful insights using SQL window functions, joins, aggregates, and more.
+# COVID-19 Data Analysis Project
 
-Project Overview
-The analysis was conducted on two main datasets:
+## Overview
 
-Covid_Deaths: Contains data on COVID-19 deaths, cases, and population information.
-Covid_Vaccinations: Contains data on vaccination rates globally.
-Key Features of the Analysis
-Data Cleanup: Removing zeros from total_cases, total_deaths, and new_cases.
-Calculation of Death Percentages: Deriving death rates based on cases per country.
-Infection Rate Calculation: Finding the percentage of populations infected by COVID-19 in different locations.
-Highest Infections and Deaths: Ranking locations by the highest infection counts and death tolls.
-Vaccination Rates: Tracking cumulative vaccination rates by location and calculating the percentage of vaccinated people per population.
-SQL Queries Included
-Initial Data Selection and Ordering:
+This project involves analyzing COVID-19 data, focusing on deaths and vaccinations across various continents and countries. The goal is to derive insights regarding the infection rates, vaccination coverage, and overall trends in the pandemic.
 
-Selects data from Covid_Deaths for analysis, ordered by location and date.
-Data Cleanup:
+## Tables Used
 
-Replaces zeros in total_deaths, total_cases, and new_cases with NULL for more accurate analysis.
-Death Percentage Calculation:
+- `PortfolioProject..Covid_Deaths`: Contains data on COVID-19 deaths, including location, date, total cases, and population.
+- `PortfolioProject..Covid_Vaccinated`: Contains data on COVID-19 vaccinations, including the number of people fully vaccinated and new vaccinations.
 
-Calculates the percentage of deaths based on the total cases for a specific location (e.g., Turkey).
-Infection Percentage:
+## SQL Queries
 
-Calculates the percentage of the population infected with COVID-19 by dividing total cases by the population.
-Highest Infection Count by Location:
+### Data Retrieval and Cleaning
 
-Identifies the highest number of infections in each location and calculates the infection percentage per population.
-Total Deaths per Location:
+1. Retrieve all data from the `Covid_Deaths` table, ordered by date and location:
+    ```sql
+    SELECT *
+    FROM 
+        PortfolioProject..Covid_Deaths
+    ORDER BY
+        3, 4;
+    ```
 
-Retrieves the total number of deaths for each location, ordered by the highest death counts.
-Deaths for Specific Regions:
+2. Retrieve COVID-19 death data for locations where the continent is known:
+    ```sql
+    SELECT
+        location, date, total_cases, new_cases, total_deaths, population
+    FROM
+        PortfolioProject..Covid_Deaths
+    WHERE
+        continent IS NOT NULL
+    ORDER BY 
+        1, 2;
+    ```
 
-Focuses on unions or specific groups of countries that are not assigned a continent and ranks them by total deaths.
-Total Deaths per Continent:
+3. Update the `Covid_Deaths` table to replace zero values with NULL:
+    ```sql
+    UPDATE PortfolioProject..Covid_Deaths
+    SET 
+        total_deaths = NULLIF(total_deaths, 0),
+        total_cases = NULLIF(total_cases, 0),
+        new_cases = NULLIF(new_cases, 0);
+    ```
 
-Aggregates total deaths across each continent.
-Daily New Cases and Deaths:
+### Calculating Percentages
 
-Summarizes daily new cases and deaths for all regions combined, with death rates.
-Vaccination Analysis:
+4. Calculate the death percentage for Turkey:
+    ```sql
+    SELECT 
+        location, 
+        date, 
+        total_cases, 
+        total_deaths, 
+        CAST((total_deaths / total_cases) * 100 AS DECIMAL(20, 10)) AS death_percentage
+    FROM 
+        PortfolioProject..Covid_Deaths
+    WHERE 
+        location LIKE 'turkey' AND continent IS NOT NULL
+    ORDER BY 
+        1, 2;
+    ```
 
-Joins Covid_Vaccinated and Covid_Deaths tables to analyze the total number of people vaccinated per location and calculates the percentage of the population vaccinated.
-Views and Temporary Tables
-View Creation: PercentPopulationVaccinated is a view that shows the cumulative number of vaccinations per location and the percentage of the population vaccinated.
+5. Calculate the infected percentage for Turkey:
+    ```sql
+    SELECT 
+        location, 
+        date, 
+        population, 
+        total_cases, 
+        CONVERT(DECIMAL(20, 10), (total_cases / population) * 100) AS infected_percentage
+    FROM 
+        PortfolioProject..Covid_Deaths
+    WHERE 
+        location LIKE 'turkey' AND continent IS NOT NULL
+    ORDER BY 
+        1, 2;
+    ```
 
-Temporary Table Creation: #PercentPopulationVaccinated is a temporary table used to store similar vaccination statistics with a rolling sum of vaccinated individuals.
+### Aggregated Data
 
-Example SQL Queries
-Death Percentage Calculation:
+6. Get the highest infection count and percentage for each location:
+    ```sql
+    SELECT 
+        location, 
+        population, 
+        MAX(total_cases) AS Highest_Infection_Count, 
+        CONVERT(DECIMAL(20, 10), MAX((total_cases / population)) * 100) AS infected_percentage
+    FROM 
+        PortfolioProject..Covid_Deaths
+    WHERE 
+        continent IS NOT NULL
+    GROUP BY
+        location, population
+    ORDER BY 
+        4 DESC;
+    ```
 
-sql
-Kodu kopyala
-SELECT 
-    location, 
-    date, 
-    total_cases, 
-    total_deaths, 
-    CAST((total_deaths / total_cases) * 100 AS DECIMAL(20, 10)) AS death_percentage
-FROM 
-    PortfolioProject..Covid_Deaths
-WHERE 
-    location LIKE 'turkey' and continent is not null
-ORDER BY 
-    1, 2;
-Infected Population Percentage:
+7. Retrieve total deaths by location:
+    ```sql
+    SELECT
+        location, MAX(CAST(total_deaths AS INT)) AS Total_Deaths
+    FROM
+        PortfolioProject..Covid_Deaths
+    WHERE 
+        continent IS NOT NULL
+    GROUP BY
+        location
+    ORDER BY
+        Total_Deaths DESC;
+    ```
 
-sql
-Kodu kopyala
-SELECT 
-    location, 
-    date, 
-    population, 
-    total_cases, 
-    CONVERT(DECIMAL(20, 10), (total_cases / population) * 100) as infected_percentage
-FROM 
-    PortfolioProject..Covid_Deaths
-WHERE 
-    location LIKE 'turkey' and continent is not null
-ORDER BY 
-    1, 2;
-Vaccination Percentage Calculation:
+### Vaccination Data Analysis
 
-sql
-Kodu kopyala
-SELECT
-    dea.continent,
-    dea.location,
-    dea.date,
-    dea.population,
-    COALESCE(vac.new_vaccinations, 0) AS new_vaccinations,
-    SUM(COALESCE(CAST(vac.new_vaccinations AS BIGINT), 0)) OVER
-        (PARTITION BY dea.location ORDER BY dea.date) AS RollingPeopleVaccinated
-FROM
-    PortfolioProject..Covid_Deaths dea
-JOIN
-    PortfolioProject..Covid_Vaccinated vac
-    ON dea.location = vac.location AND dea.date = vac.date
-WHERE 
-    dea.continent IS NOT NULL
-ORDER BY
-    dea.location, dea.date;
-Getting Started
-Clone the repository:
-bash
-Kodu kopyala
-git clone https://github.com/yourusername/covid19-sql-analysis.git
-Set up the database environment and import the datasets.
-Run the SQL scripts in the order they appear to reproduce the analysis.
-Tools and Technologies Used
-SQL Server for database management.
-SQL Window Functions for rolling calculations.
-Joins and Aggregations to merge and summarize data.
-Data Cleaning using NULLIF to handle missing or invalid values.
-Dataset
-The datasets used in this analysis come from the Our World in Data project, which provides publicly available COVID-19 statistics.
+8. Calculate the total vaccinations per location:
+    ```sql
+    SELECT
+        dea.location, dea.population, MAX(vac.people_fully_vaccinated) AS Total_Vaccinated
+    FROM
+        PortfolioProject..Covid_Vaccinated vac
+    JOIN 
+        PortfolioProject..Covid_Deaths dea ON vac.location = dea.location AND vac.date = dea.date
+    WHERE 
+        dea.continent IS NOT NULL AND vac.continent IS NOT NULL
+    GROUP BY 
+        dea.location, dea.population
+    ORDER BY 
+        1, 2 DESC;
+    ```
 
-Contributing
-If you find any issues or have suggestions for improvements, feel free to open an issue or submit a pull request.
+### Creating Views
+
+9. Create a view for the population vaccinated:
+    ```sql
+    CREATE VIEW PercentPopulationVaccinated AS 
+    SELECT
+        dea.continent, 
+        dea.location, 
+        dea.date, 
+        dea.population, 
+        vac.new_vaccinations,
+        SUM(CONVERT(BIGINT, vac.new_vaccinations)) OVER (PARTITION BY dea.location ORDER BY dea.date) AS RollingPeopleVaccinated
+    FROM
+        PortfolioProject..Covid_Deaths dea
+    JOIN
+        PortfolioProject..Covid_Vaccinated vac
+        ON dea.location = vac.location AND dea.date = vac.date
+    WHERE
+        dea.continent IS NOT NULL;
+    ```
+
+## Conclusion
+
+This project aims to provide insights into the COVID-19 pandemic by analyzing and visualizing the data related to deaths and vaccinations. The queries above can be further extended to generate visual representations and deeper analyses as needed.
