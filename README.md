@@ -184,6 +184,69 @@ Please note that the dataset may have been updated over time, so ensure you are 
         dea.continent IS NOT NULL;
     ```
 
+### Tableau Preparation Queries
+
+11. Summarize new cases and deaths for use in Tableau visualizations:
+        ```sql
+        SELECT 
+        SUM(new_cases) AS total_cases, 
+        SUM(CAST(new_deaths AS INT)) AS total_deaths, 
+        SUM(CAST(new_deaths AS INT)) / SUM(new_cases) * 100 AS DeathPercentage
+    FROM 
+        PortfolioProject..Covid_Deaths
+    WHERE 
+        continent IS NOT NULL
+    ORDER BY 
+        1, 2;
+        ```
+    
+12. Retrieve total death counts for countries not associated with any continent:
+        ```sql
+        SELECT 
+        location, 
+        SUM(CAST(new_deaths AS INT)) AS TotalDeathCount
+    FROM 
+        PortfolioProject..Covid_Deaths
+    WHERE 
+        continent IS NULL 
+        AND location NOT IN ('World', 'European Union', 'International')
+        AND location NOT LIKE ('%countries%')
+    GROUP BY 
+        location
+    ORDER BY 
+        TotalDeathCount DESC;
+        ```
+13. Get the highest infection count and infection percentage for each location:
+        ```sql
+        SELECT 
+        Location, 
+        Population, 
+        MAX(total_cases) AS HighestInfectionCount,  
+        MAX((total_cases / population)) * 100 AS PercentPopulationInfected
+    FROM 
+        PortfolioProject..Covid_Deaths
+    GROUP BY 
+        Location, Population
+    ORDER BY 
+        PercentPopulationInfected DESC;
+        ```
+
+14. Get the highest infection count and infection percentage with a date filter:
+        ```sql
+        SELECT 
+        Location, 
+        Population, 
+        date, 
+        MAX(total_cases) AS HighestInfectionCount,  
+        MAX((total_cases / population)) * 100 AS PercentPopulationInfected
+    FROM 
+        PortfolioProject..Covid_Deaths
+    GROUP BY 
+        Location, Population, date
+    ORDER BY 
+        PercentPopulationInfected DESC;
+        ```
+    
 ## Conclusion
 
 This project aims to provide insights into the COVID-19 pandemic by analyzing and visualizing the data related to deaths and vaccinations. The queries above utilize various SQL features, including CTEs, aggregate functions, and window functions, allowing for detailed analysis of the COVID-19 situation globally. These queries can be further extended to generate visual representations and deeper analyses as needed.
