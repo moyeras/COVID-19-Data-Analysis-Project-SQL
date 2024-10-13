@@ -128,9 +128,35 @@ This project involves analyzing COVID-19 data, focusing on deaths and vaccinatio
         1, 2 DESC;
     ```
 
+### Common Table Expressions (CTEs)
+
+9. Use a CTE to calculate the rolling vaccination numbers and the percentage vaccinated:
+    ```sql
+    WITH PopvsVac (Continent, Location, Date, Population, New_Vaccinations, RollingPeopleVaccinated) AS
+    (
+        SELECT
+            dea.continent,
+            dea.location,
+            dea.date,
+            dea.population,
+            vac.new_vaccinations,
+            SUM(CAST(vac.new_vaccinations AS DECIMAL(20, 2))) OVER
+            (PARTITION BY dea.location ORDER BY dea.date) AS RollingPeopleVaccinated
+        FROM
+            PortfolioProject..Covid_Deaths dea
+        JOIN
+            PortfolioProject..Covid_Vaccinated vac
+            ON dea.location = vac.location AND dea.date = vac.date
+        WHERE 
+            dea.continent IS NOT NULL
+    )
+    SELECT *, CAST(RollingPeopleVaccinated / Population AS DECIMAL(20, 10)) * 100 AS PercentageVaccinated 
+    FROM PopvsVac;
+    ```
+
 ### Creating Views
 
-9. Create a view for the population vaccinated:
+10. Create a view for the population vaccinated:
     ```sql
     CREATE VIEW PercentPopulationVaccinated AS 
     SELECT
@@ -151,4 +177,4 @@ This project involves analyzing COVID-19 data, focusing on deaths and vaccinatio
 
 ## Conclusion
 
-This project aims to provide insights into the COVID-19 pandemic by analyzing and visualizing the data related to deaths and vaccinations. The queries above can be further extended to generate visual representations and deeper analyses as needed.
+This project aims to provide insights into the COVID-19 pandemic by analyzing and visualizing the data related to deaths and vaccinations. The queries above utilize various SQL features, including CTEs, aggregate functions, and window functions, allowing for detailed analysis of the COVID-19 situation globally. These queries can be further extended to generate visual representations and deeper analyses as needed.
