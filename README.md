@@ -187,7 +187,7 @@ Please note that the dataset may have been updated over time, so ensure you are 
 ### Tableau Preparation Queries 1
 
 11. Summarize new cases and deaths for use in Tableau visualizations:
-        ```sql
+```sql
         SELECT 
         SUM(new_cases) AS total_cases, 
         SUM(CAST(new_deaths AS INT)) AS total_deaths, 
@@ -198,7 +198,7 @@ Please note that the dataset may have been updated over time, so ensure you are 
         continent IS NOT NULL
     ORDER BY 
         1, 2;
-        ```
+```
     
     ### Tableau Preparation Queries 2
     
